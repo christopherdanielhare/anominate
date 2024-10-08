@@ -1,0 +1,11 @@
+exportPattern("^[[:alpha:]]+")
+useDynLib(anominate, .registration=TRUE)
+import(stats, coda, wnominate, MCMCpack, pscl)
+importFrom("grDevices", "dev.new")
+importFrom("graphics", "par", "plot", "points", "segments")
+importFrom("stats", "na.omit", "quantile", "runif")
+importFrom("utils", "read.table")
+S3method(plot,anominate)
+S3method(summary,anominate)
+
+
