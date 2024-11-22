@@ -1,41 +1,53 @@
 \name{plot.anominate}
 \alias{plot.anominate}
-\title{alpha-NOMINATE Coordinate Plot Function}
+\title{alpha-NOMINATE Coordinate Plot }
 
 \description{
-  \code{plot.anominate} reads a \code{anominate} object and plots the estimated ideal points.
+  \code{plot.anominate} reads an \code{anominate} object and plots the estimated ideal points.
 }
 
 \usage{
-  \method{plot}{anominate}(x, ...)
+  \method{plot}{anominate}(x, \dots)
 }
 
 \arguments{
-  \item{x}{ output of class \code{anominate}, generated as output from function \code{anominate}.}
-  \item{...}{ other arguments to \code{plot}}
+  \item{x}{ An \code{anominate} output object. }
+  \item{...}{ Other arguments do nothing and are not passed to any functions. }
 }
 
 \value{
-   A coordinate plot, with 95\% credible interval bars.
+   A coordinate plot of estimated ideal points (with 95\% credible interval bars) of an \code{anominate} object.
 }
-
-\references{
-Carroll, Royce, Jeffrey B. Lewis, James Lo, Keith T. Poole and Howard Rosenthal. 2013. ``The Structure of Utility in Spatial Models of Voting.'' \emph{American Journal of Political Science} 57(4): 1008--1028.
-}
-
 
 \author{
-Christopher Hare, Royce Carroll, Jeffrey B. Lewis, James Lo, Keith T. Poole and Howard Rosenthal
+Royce Carroll \email{rcarroll@rice.edu}
+
+Christopher Hare \email{cdhare@ucdavis.edu}
+
+Jeffrey B. Lewis \email{jblewis@ucla.edu}
+
+James Lo \email{lo@uni-mannheim.de}
+
+Keith T. Poole \email{ktpoole@uga.edu}
+
+Howard Rosenthal \email{hl31@nyu.edu}
 }
 
 \seealso{
-  '\link{summary.anominate}','\link{anominate}','\link{densplot.anominate}','\link{traceplot.anominate}'.
+  '\link{anominate}','\link{summary.anominate}','\link{densplot.anominate}','\link{traceplot.anominate}','\link{sen111}', '\link{sen111_anom}'.
 }
-
 
 \examples{
-data(sen111_anom)
-plot(sen111_anom)
+  data(sen111)
+  \donttest{
+  sen111_anom <- anominate(sen111, dims=1, polarity=2, 
+    nsamp=200, thin=1, burnin=100, random.starts=FALSE, 
+    verbose=FALSE, constrain=FALSE)
+  }
+  # 'sen111_anom' can be retrieved quickly with: 
+  data(sen111_anom)
+  
+  plot(sen111_anom)
 }
 
-\keyword{ideal point estimation, NOMINATE, Bayesian latent variable models}
+\keyword{ ideal point estimation }

@@ -8,7 +8,7 @@
   \code{rollcall} object format in Simon Jackman's \code{pscl} package.}
 
 \usage{
-  data(sen111)
+data(sen111)
 }
 
 
@@ -19,7 +19,7 @@
   \item{votes}{ data frame, containing all data from the old \code{nom31.dat} file about
         legislators. For a typical W-NOMINATE object run with an ORD file read using
         \code{readKH}, it will contain the following:
-    \itemize{
+    \describe{
     \item{\code{state}}{ State name of legislator.}
     \item{\code{icpsrState}}{ ICPSR state code of legislator.}
     \item{\code{cd}}{ Congressional District number.}
@@ -35,7 +35,7 @@
   \item{n}{ numeric, number of legislators }
   \item{m}{ numeric, number of roll calls }
   \item{legis.data}{ data frame, containing the following information on legislators:
-    \itemize{
+    \describe{
     \item{\code{state}}{ State name of legislator.}
     \item{\code{icpsrState}}{ ICPSR state code of legislator.}
     \item{\code{cd}}{ Congressional District number.}
@@ -52,24 +52,41 @@
 
 \source{
   Keith Poole. 2014. \emph{111th Senate Roll Call Vote Data}.
-  \url{http://www.k7moa.com/}.
-}
-
-\references{
-Carroll, Royce, Jeffrey B. Lewis, James Lo, Keith T. Poole and Howard Rosenthal. 2013. ``The Structure of Utility in Spatial Models of Voting.'' \emph{American Journal of Political Science} 57(4): 1008--1028.
+  \url{https://www.voteview.com/}.
 }
 
 \author{
-Christopher Hare, Royce Carroll, Jeffrey B. Lewis, James Lo, Keith T. Poole and Howard Rosenthal
+Royce Carroll \email{rcarroll@rice.edu}
+
+Christopher Hare \email{cdhare@ucdavis.edu}
+
+Jeffrey B. Lewis \email{jblewis@ucla.edu}
+
+James Lo \email{lo@uni-mannheim.de}
+
+Keith T. Poole \email{ktpoole@uga.edu}
+
+Howard Rosenthal \email{hl31@nyu.edu}
 }
 
 \seealso{
-  '\link{summary.anominate}','\link{anominate}','\link{densplot.anominate}','\link{traceplot.anominate}','\link{plot.anominate}.
+  '\link{anominate}'.
 }
-
 
 \examples{
-data(sen111)
+  data(sen111)
+  summary(sen111)
+   
+  \donttest{
+  sen111_anom <- anominate(sen111, dims=1, polarity=2, 
+    nsamp=200, thin=1, burnin=100, random.starts=FALSE, 
+    verbose=FALSE, constrain=FALSE)
+  }
+  # 'sen111_anom' can be retrieved quickly with: 
+  data(sen111_anom)
+
+  summary(sen111_anom)
+  plot(sen111_anom)
 }
 
-\keyword{ideal point estimation, NOMINATE, Bayesian latent variable models}
+\keyword{ datasets }

@@ -4,7 +4,7 @@ import(stats, coda, wnominate, MCMCpack, pscl)
 importFrom("grDevices", "dev.new")
 importFrom("graphics", "par", "plot", "points", "segments")
 importFrom("stats", "na.omit", "quantile", "runif")
-importFrom("utils", "read.table")
+importFrom("utils", "read.table", "capture.output")
 S3method(plot,anominate)
 S3method(summary,anominate)
 

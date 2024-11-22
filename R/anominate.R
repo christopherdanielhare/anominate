@@ -6,7 +6,7 @@
 
 summary.anominate <- function(object, ...){
         x <- object 
-        if(!class(x)=="anominate") stop("Input is not of class 'anominate'.")
+        if (!inherits(x, "anominate")) stop("Input is not of class 'anominate'.")
 	
 	cat("\n\nSUMMARY OF ANOMINATE OBJECT")
 	cat("\n---------------------------\n")
@@ -31,7 +31,7 @@ summary.anominate <- function(object, ...){
 
 
 densplot.anominate <- function(x, ...){
-	if(!class(x)=="anominate") stop("Input is not of class 'anominate'.")
+	if (!inherits(x, "anominate")) stop("Input is not of class 'anominate'.")
         densplot(x$alpha, main=paste("Density plot of alpha\n Mean = ", round(mean(x$alpha),3),
 		" [",round(quantile(x$alpha, probs=0.025),3),", ", round(quantile(x$alpha, probs=0.975),3),"]",sep=""), ... )
 }
@@ -39,7 +39,7 @@ densplot.anominate <- function(x, ...){
 
 traceplot.anominate <- function(x, ...){
 	
-	if(!class(x)=="anominate") stop("Input is not of class 'anominate'.")
+	if (!inherits(x, "anominate")) stop("Input is not of class 'anominate'.")
 	
 	traceplot(x$alpha, main=paste("Trace plot of alpha\n Mean = ", round(mean(x$alpha),3),
 	" [",round(quantile(x$alpha, probs=0.025),3),", ",round(quantile(x$alpha, probs=0.975),3),"]",sep=""), ...)
@@ -48,7 +48,7 @@ traceplot.anominate <- function(x, ...){
 
 plot.anominate <- function(x, ...){
 
-	if(!class(x)=="anominate") stop("Input is not of class 'anominate'.")
+	if (!inherits(x, "anominate")) stop("Input is not of class 'anominate'.")
 
 	legislators <- x$legislators
 	wnom.result <- x$wnom.result
@@ -85,6 +85,8 @@ plot.anominate <- function(x, ...){
 
 	if (dims == 2){
 	dev.new(width=7, height=4)
+	oldpar <- par(no.readonly = TRUE)
+	on.exit(par(oldpar))
 	par(mfrow=c(1,2))
 	for (i in 1:dims){
 	plot(wnom.coords[,i], anom.means[,i],
@@ -98,6 +100,8 @@ plot.anominate <- function(x, ...){
 
 	if (dims >= 3 & dims <= 4){
 	dev.new(width=8, height=8)
+	oldpar <- par(no.readonly = TRUE)
+	on.exit(par(oldpar))
 	par(mfrow=c(2,2))
 	for (i in 1:dims){
 	plot(wnom.coords[,i], anom.means[,i],
@@ -111,6 +115,8 @@ plot.anominate <- function(x, ...){
 
 	if (dims >= 5 & dims <= 9){
 	dev.new(width=9, height=9)
+	oldpar <- par(no.readonly = TRUE)
+	on.exit(par(oldpar))
 	par(mfrow=c(3,3))
 	for (i in 1:dims){
 	plot(wnom.coords[,i], anom.means[,i],
@@ -130,13 +136,26 @@ anominate <- function(rcObject, dims=1, nsamp=1000, thin=1, burnin=500,
 	minvotes=20, lop=0.025, polarity=1,
 	random.starts=TRUE, verbose=FALSE, constrain=FALSE) 
 {
-    cat("\nPreparing to run alpha-NOMINATE...\n\n")
+    message("\nPreparing to run alpha-NOMINATE...\n\n")
     start <- proc.time()
 
+if(verbose==TRUE){
     wnom.result <- wnominate(rcObject, ubeta = 15, uweights = 0.5,
+                            dims = dims, minvotes = minvotes, 
+                            lop = lop, trials = 3, polarity = polarity,
+                            verbose = FALSE)
+}
+
+
+if(verbose==FALSE){
+	templog <- capture.output({
+    	wnom.result <- wnominate(rcObject, ubeta = 15, uweights = 0.5,
                              dims = dims, minvotes = minvotes, 
                              lop = lop, trials = 3, polarity = polarity,
-                             verbose = FALSE) 
+                             verbose = FALSE); 
+	})
+}
+
 
     use.votes <- !is.na(wnom.result$rollcalls$spread1D)
     use.legis <- !is.na(wnom.result$legislators$coord1D)
@@ -197,25 +216,40 @@ anominate <- function(rcObject, dims=1, nsamp=1000, thin=1, burnin=500,
 #    print(summary(legis.starts))
 
 if(verbose==TRUE){
-	verbose <- 100
+	verboseC <- 100
+	anom.res <- .C("Canominate",
+				rcdata = as.integer(rcmatrix),
+				legis.starts = legis.starts,
+				bill.starts = bill.starts,
+				output=numeric(output.len),
+				thin=as.integer(thin),
+				ncol=as.integer(nvotes),
+				nrow=as.integer(nlegis),
+				nsamples=as.integer(nsamp),
+				dim=as.integer(dims),
+				verbose=as.integer(verboseC),
+				constrain=as.integer(constrain))
 }
 
 if (verbose==FALSE){	
-	verbose <- 100000000
+	verboseC <- 100000000
+	templog2 <- capture.output({
+		anom.res <- .C("Canominate",
+				rcdata = as.integer(rcmatrix),
+				legis.starts = legis.starts,
+				bill.starts = bill.starts,
+				output=numeric(output.len),
+				thin=as.integer(thin),
+				ncol=as.integer(nvotes),
+				nrow=as.integer(nlegis),
+				nsamples=as.integer(nsamp),
+				dim=as.integer(dims),
+				verbose=as.integer(verboseC),
+				constrain=as.integer(constrain));
+	})
 }
 
-    anom.res <- .C("Canominate",
-               rcdata = as.integer(rcmatrix),
-               legis.starts = legis.starts,
-               bill.starts = bill.starts,
-               output=numeric(output.len),
-               thin=as.integer(thin),
-               ncol=as.integer(nvotes),
-               nrow=as.integer(nlegis),
-               nsamples=as.integer(nsamp),
-               dim=as.integer(dims),
-               verbose=as.integer(verbose),
-	       constrain=as.integer(constrain))
+
     
      anom.mat <- matrix(anom.res$output,ncol=nparam,byrow=TRUE)
      anom.mat <- anom.mat[(burnin+1):nrow(anom.mat),]
@@ -308,17 +342,17 @@ for (i in 1:dims){
 
     class(anomObject) <- c("anominate")
 
-    cat("alpha-NOMINATE estimation completed successfully.")
-    cat("\nalpha-NOMINATE took", (proc.time() - start)[3], "seconds to execute.\n\n")
+    message("alpha-NOMINATE estimation completed successfully.")
+    message("\nalpha-NOMINATE took ", (proc.time() - start)[3], " seconds to execute.\n\n")
 
     anomObject
 
 }
 
 
-anominate.sim <- function(nvotes=500, nlegis=101, seed=123345, utility="normal"){
+simulateData <- function(nvotes=500, nlegis=101, seed=123345, utility="normal"){
 
-  if(utility !="normal" | utility!="quadratic") cat("\n Utility must be 'normal' or 'quadratic'")
+  if(utility !="normal" & utility!="quadratic") stop("\n Utility must be 'normal' or 'quadratic'")
     
   set.seed(seed)
   yealocs <- matrix(runif(nvotes,min=-1.0,max=0.5),nrow=nvotes,ncol=1)
